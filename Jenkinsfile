@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent "shubham-node"
 
     environment {
         DEPLOY_DIR = "/var/www/html"
