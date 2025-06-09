@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'arpita-slave-1' }
+    agent { label 'arpita-slave' }
 
     environment {
         DEPLOY_DIR = "/var/www/html"
