@@ -1,15 +1,35 @@
 pipeline {
     agent any
 
+    environment {
+        DEPLOY_DIR = "/var/www/html"
+    }
+
     stages {
-        stage('Deploy') {
+
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Shubhamtapkir29/2025.git'
+            }
+        }
+
+        stage('Clean Deploy Directory') {
             steps {
                 sh '''
-                echo "Deploying from branch: ${BRANCH_NAME}"
+                echo "🧹 Cleaning old content in $DEPLOY_DIR"
+                sudo rm -rf ${DEPLOY_DIR}/*
+                '''
+            }
+        }
+
+        stage('Deploy to Apache') {
+            steps {
+                sh '''
+                echo "🚀 Starting Apache"
                 sudo pkill -f httpd || true
                 sudo systemctl start httpd
-                sudo chmod -R 777 /var/www/html
-                sudo rsync -av --delete ./ /var/www/html/
+                sudo chmod -R 777 ${DEPLOY_DIR}
+                sudo cp -r * ${DEPLOY_DIR}/
                 '''
             }
         }
@@ -17,10 +37,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment from ${BRANCH_NAME} successful."
+            echo "✅ Deployment from 'main' branch successful!"
         }
         failure {
-            echo "❌ Deployment from ${BRANCH_NAME} failed."
+            echo "❌ Deployment failed. Check the logs above."
         }
     }
 }
