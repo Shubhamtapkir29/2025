@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'arpita-slave' }
+    agent { label 'arpita-slave-1' }
 
     environment {
         DEPLOY_DIR = "/var/www/html"
@@ -29,6 +29,7 @@ pipeline {
                 sudo cp -r * ${DEPLOY_DIR}/
                 sudo chmod -R 755 ${DEPLOY_DIR}
                 sudo systemctl restart httpd
+                sudo service httpd start
                 '''
             }
         }
