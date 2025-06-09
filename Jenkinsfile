@@ -1,8 +1,8 @@
 pipeline {
-    agent any
+    agent { label 'arpita-slave' }
 
     environment {
-        DEPLOY_DIR = "/var/www/html"
+        DEPLOY_DIR = "/var/www/deploy"
     }
 
     stages {
@@ -18,6 +18,7 @@ pipeline {
                 sh '''
                 echo "🧹 Cleaning old content in $DEPLOY_DIR"
                 sudo rm -rf ${DEPLOY_DIR}/*
+                sudo mkdir -p ${DEPLOY_DIR}
                 '''
             }
         }
@@ -28,7 +29,7 @@ pipeline {
                 echo "🚀 Starting Apache"
                 sudo pkill -f httpd || true
                 sudo systemctl start httpd
-                sudo chmod -R 777 ${DEPLOY_DIR}
+                sudo chmod -R 755 ${DEPLOY_DIR}
                 sudo cp -r * ${DEPLOY_DIR}/
                 '''
             }
@@ -37,7 +38,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment from 'main' branch successful!"
+            echo "✅ Deployment from '2025Q1' branch successful!"
         }
         failure {
             echo "❌ Deployment failed. Check the logs above."
