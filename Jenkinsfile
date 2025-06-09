@@ -1,46 +1,35 @@
 pipeline {
-    agent {
-       label "shubham-node"
-    }
+    agent any
 
     environment {
         DEPLOY_DIR = "/var/www/html"
-        BRANCH = "2025Q1"
-        REPO = "https://github.com/Shubhamtapkir29/2025.git"
     }
 
     stages {
+
+        stage('Clone Repository') {
+            steps {
+                git branch: '2025Q1', url: 'https://github.com/Shubhamtapkir29/2025.git'
+            }
+        }
+
         stage('Clean Deploy Directory') {
             steps {
-                script {
-                    sh "sudo rm -rf ${DEPLOY_DIR}/*"
-                }
+                sh '''
+                echo "🧹 Cleaning old content in $DEPLOY_DIR"
+                sudo rm -rf ${DEPLOY_DIR}/*
+                '''
             }
         }
 
-        stage('Clone Repo') {
-            steps {
-                git branch: "${BRANCH}", url: "${REPO}"
-            }
-        }
-
-        stage('Deploy to Apache Directory') {
-            steps {
-                sh """
-                    sudo cp -r * ${DEPLOY_DIR}/
-                    sudo chmod -R 777 ${DEPLOY_DIR}
-                """
-            }
-        }
-
-        stage('Restart Apache Properly') {
+        stage('Deploy to Apache') {
             steps {
                 sh '''
-                    sudo pkill -f httpd || true
-                    sleep 2
-                    ps aux | grep httpd
-                    sudo systemctl start httpd
-                    sudo systemctl status httpd
+                echo "🚀 Starting Apache"
+                sudo pkill -f httpd || true
+                sudo systemctl start httpd
+                sudo chmod -R 777 ${DEPLOY_DIR}
+                sudo cp -r * ${DEPLOY_DIR}/
                 '''
             }
         }
@@ -48,10 +37,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful!"
+            echo "✅ Deployment from 'main' branch successful!"
         }
         failure {
-            echo "❌ Deployment failed. Check logs."
+            echo "❌ Deployment failed. Check the logs above."
         }
     }
 }
