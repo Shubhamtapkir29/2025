@@ -2,7 +2,7 @@ pipeline {
     agent { label 'arpita-slave' }
 
     environment {
-        DEPLOY_DIR = "/var/www/deploy"
+        DEPLOY_DIR = "/var/www/html"
     }
 
     stages {
@@ -16,9 +16,8 @@ pipeline {
         stage('Clean Deploy Directory') {
             steps {
                 sh '''
-                echo "🧹 Cleaning old content in $DEPLOY_DIR"
+                echo "🧹 Cleaning $DEPLOY_DIR on arpita-slave"
                 sudo rm -rf ${DEPLOY_DIR}/*
-                sudo mkdir -p ${DEPLOY_DIR}
                 '''
             }
         }
@@ -26,11 +25,10 @@ pipeline {
         stage('Deploy to Apache') {
             steps {
                 sh '''
-                echo "🚀 Starting Apache"
-                sudo pkill -f httpd || true
-                sudo systemctl start httpd
-                sudo chmod -R 755 ${DEPLOY_DIR}
+                echo "🚀 Deploying to Apache on arpita-slave"
                 sudo cp -r * ${DEPLOY_DIR}/
+                sudo chmod -R 755 ${DEPLOY_DIR}
+                sudo systemctl restart httpd
                 '''
             }
         }
@@ -38,10 +36,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment from '2025Q1' branch successful!"
+            echo "✅ Deployment on 'arpita-slave' successful!"
         }
         failure {
-            echo "❌ Deployment failed. Check the logs above."
+            echo "❌ Deployment failed. Check logs on 'arpita-slave'."
         }
     }
 }
